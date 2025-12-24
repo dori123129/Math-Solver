@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Solver App</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  background: white;
+  width: 420px;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.hidden {
+  display: none;
+}
+
+h1 {
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  background: #4f46e5;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+button.secondary {
+  background: #e5e7eb;
+  color: black;
+}
+
+.result {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  min-height: 40px;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="app" id="home">
+  <div class="nav">
+    <button class="secondary" onclick="goHome()">Home</button>
+    <button class="secondary" onclick="goLogin()">Owner</button>
+  </div>
+
+  <h1>🧮 Math Solver</h1>
+  <div class="subtitle">Solve math & earn</div>
+
+  <input id="expression" placeholder="Example: sqrt(256) + 5^2">
+  <button onclick="solve()">Calculate</button>
+
+  <div class="result" id="result">Result appears here</div>
+</div>
+
+<!-- LOGIN -->
+<div class="app hidden" id="login">
+  <h1>🔐 Owner Login</h1>
+
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+
+  <div class="result" id="loginMsg"></div>
+  <button class="secondary" onclick="goHome()">← Back</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="app hidden" id="dashboard">
+  <h1>💰 Owner Earnings</h1>
+
+  <div class="result">
+    <p><strong>Total Earnings:</strong> <span id="earnings">$0.00</span></p>
+    <p>Rate: $0.01 per calculation</p>
+  </div>
+
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+const OWNER_PASSWORD = "admin123";
+const RATE = 0.01;
+
+// navigation
+function hideAll() {
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.add("hidden");
+}
+
+function goHome() {
+  hideAll();
+  document.getElementById("home").classList.remove("hidden");
+}
+
+function goLogin() {
+  hideAll();
+  document.getElementById("login").classList.remove("hidden");
+}
+
+// earnings logic
+function getEarnings() {
+  return parseFloat(localStorage.getItem("earnings")) || 0;
+}
+
+function saveEarnings(v) {
+  localStorage.setItem("earnings", v.toFixed(2));
+}
+
+// math solver
+function solve() {
+  const exp = document.getElementById("expression").value;
+  const result = document.getElementById("result");
+
+  try {
+    const value = math.evaluate(exp);
+    result.innerHTML = "<b>Result:</b> " + value;
+
+    let earnings = getEarnings();
+    earnings += RATE;
+    saveEarnings(earnings);
+  } catch {
+    result.innerHTML = "❌ Invalid expression";
+  }
+}
+
+// auth
+function login() {
+  const pass = document.getElementById("password").value;
+
+  if (pass === OWNER_PASSWORD) {
+    hideAll();
+    document.getElementById("dashboard").classList.remove("hidden");
+    document.getElementById("earnings").innerText =
+      "$" + getEarnings().toFixed(2);
+  } else {
+    document.getElementById("loginMsg").innerText = "❌ Wrong password";
+  }
+}
+
+function logout() {
+  goHome();
+}
+</script>
+
+</body>
+</html>
